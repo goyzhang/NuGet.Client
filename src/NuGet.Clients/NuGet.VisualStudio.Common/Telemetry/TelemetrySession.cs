@@ -6,6 +6,7 @@ using NuGet.Common;
 using VsTelemetryEvent = Microsoft.VisualStudio.Telemetry.TelemetryEvent;
 using VsTelemetryService = Microsoft.VisualStudio.Telemetry.TelemetryService;
 using VsTelemetryPiiProperty = Microsoft.VisualStudio.Telemetry.TelemetryPiiProperty;
+using VsTelemetryComplexProperty = Microsoft.VisualStudio.Telemetry.TelemetryComplexProperty;
 
 namespace NuGet.VisualStudio.Telemetry
 {
@@ -40,6 +41,20 @@ namespace NuGet.VisualStudio.Telemetry
             foreach (var pair in telemetryEvent.GetPiiData())
             {
                 vsTelemetryEvent.Properties[VSPropertyNamePrefix + pair.Key] = new VsTelemetryPiiProperty(pair.Value);
+            }
+
+            // serialize PII lists
+            foreach (var piiList in telemetryEvent.GetPiiLists())
+            {
+                // construct a list of PII props
+                System.Collections.Generic.List<VsTelemetryPiiProperty> piiProps = new System.Collections.Generic.List<VsTelemetryPiiProperty>();
+                foreach (var propertyValue in piiList.Value)
+                {
+                    piiProps.Add(new VsTelemetryPiiProperty(propertyValue));
+                }
+
+                vsTelemetryEvent.Properties[VSPropertyNamePrefix + piiList.Key] = new VsTelemetryComplexProperty(piiProps.ToArray());
+                
             }
 
             return vsTelemetryEvent;
