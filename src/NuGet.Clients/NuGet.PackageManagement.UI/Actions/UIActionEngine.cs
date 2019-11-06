@@ -359,7 +359,8 @@ namespace NuGet.PackageManagement.UI
                             var updateCount = results.SelectMany(result => result.Updated).
                                 Select(result => result.New.Id).Distinct().Count();
 
-                            updatedPackages = results.SelectMany(result => result.Updated).Select(package => package.Id).Distinct();
+                            //updated packages have an old and a new id.  Select the new Id.
+                            updatedPackages = results.SelectMany(result => result.Updated).Select(package => package.New.Id).Distinct();
 
                             // update packages count
                             packageCount = addCount + updateCount;
