@@ -112,6 +112,7 @@ namespace NuGet.PackageManagement.UI
                     return ExecuteActionsAsync(actions, uiService.ProjectContext, uiService.CommonOperations, userAction, sourceCacheContext, token);
                 },
                 operationType,
+                userAction,
                 token);
         }
 
@@ -245,6 +246,7 @@ namespace NuGet.PackageManagement.UI
                         token);
                 },
                 NuGetOperationType.Update,
+                null,
                 token);
         }
 
@@ -308,6 +310,7 @@ namespace NuGet.PackageManagement.UI
             Func<SourceCacheContext, Task<IReadOnlyList<ResolvedAction>>> resolveActionsAsync,
             Func<IReadOnlyList<ResolvedAction>, SourceCacheContext, Task> executeActionsAsync,
             NuGetOperationType operationType,
+            UserAction userAction,
             CancellationToken token)
         {
             var status = NuGetOperationStatus.Succeeded;
@@ -456,6 +459,11 @@ namespace NuGet.PackageManagement.UI
                         status,
                         packageCount,
                         duration.TotalSeconds);
+
+                    if (userAction != null)
+                    {
+                        actionTelemetryEvent.AddPiiData("SelectedPackage", userAction.PackageId);
+                    }
 
                     // log information about changed  Packages.  Treat package name as PII data.
                     if (addedPackages != null && addedPackages.Count() > 0)
