@@ -168,7 +168,6 @@
     <Compile Include="Telemetry\SearchSelectionTelemetryEvent.cs" />
     <Compile Include="Telemetry\SearchTelemetryEvent.cs" />
     <Compile Include="Telemetry\SourceTelemetry.cs" />
-    <Compile Include="Telemetry\TelemetryPiiPackageInfo.cs" />
     <Compile Include="Telemetry\VSTelemetryServiceUtility.cs" />
     <Compile Include="Utility\EnvDTEProjectUtility.cs" />
     <Compile Include="Utility\EnvDTESolutionUtility.cs" />

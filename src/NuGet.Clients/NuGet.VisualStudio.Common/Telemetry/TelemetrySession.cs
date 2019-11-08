@@ -43,7 +43,14 @@ namespace NuGet.VisualStudio.Telemetry
                 vsTelemetryEvent.Properties[VSPropertyNamePrefix + pair.Key] = new VsTelemetryPiiProperty(pair.Value);
             }
 
-            // serialize PII lists
+            // serialize any PII packages
+            foreach (var namedTuple in telemetryEvent.GetPiiPackages())
+            {
+                var v = new TelemetryPiiPackageInfo() { Name = new VsTelemetryPiiProperty(namedTuple.Value.Item1), Version = namedTuple.Value.Item2 };
+                vsTelemetryEvent.Properties[VSPropertyNamePrefix + namedTuple.Key] = new VsTelemetryComplexProperty(v);
+            }
+
+            // serialize lists of PII values
             foreach (var piiList in telemetryEvent.GetPiiLists())
             {
                 // construct a list of PII props
@@ -58,7 +65,7 @@ namespace NuGet.VisualStudio.Telemetry
             }
 
             // serialize lists of tuples of pkgname,pkgversion, where names are client side hashed
-            foreach ( var piiTupleList in telemetryEvent.GetPiiTupleLists())
+            foreach ( var piiTupleList in telemetryEvent.GetPiiPackageList())
             {
                 // construct a list of objects containing PII
                 System.Collections.Generic.List<TelemetryPiiPackageInfo> piiTuples = new System.Collections.Generic.List<TelemetryPiiPackageInfo>();

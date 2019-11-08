@@ -14,7 +14,8 @@ namespace NuGet.Common
         private IDictionary<string, object> _properties;
         private IDictionary<string, object> _piiProperties;
         private IDictionary<string, IEnumerable<string>> _piiLists;
-        private IDictionary<string, IEnumerable<Tuple<string, string>>> _piiTupleLists;
+        private IDictionary<string, Tuple<string, string>> _piiPackages;
+        private IDictionary<string, IEnumerable<Tuple<string, string>>> _piiPackageLists;
 
         public TelemetryEvent(string eventName) :
             this(eventName, new Dictionary<string, object>())
@@ -27,7 +28,8 @@ namespace NuGet.Common
             _properties = properties;
             _piiProperties = new Dictionary<string, object>();
             _piiLists = new Dictionary<string, IEnumerable<string>>();
-            _piiTupleLists = new Dictionary<string, IEnumerable<Tuple<string, string>>>();
+            _piiPackages = new Dictionary<string, Tuple<string, string>>();
+            _piiPackageLists = new Dictionary<string, IEnumerable<Tuple<string, string>>>();
         }
 
         public string Name { get; }
@@ -69,20 +71,29 @@ namespace NuGet.Common
             return _piiProperties;
         }
 
+        public IEnumerable<KeyValuePair<string, Tuple<string, string>>> GetPiiPackages()
+        {
+            return _piiPackages;
+        }
 
         public void AddListOfPiiValues(string key, IEnumerable<string> listOfValues)
         {
             _piiLists.Add(key, listOfValues);
         }
 
-        public void AddListOfPiiTuples(string key, IEnumerable<Tuple<string, string>> listOfTuples)
+        public void AddPiiPackage(string key, Tuple<string, string> packageInfo)
         {
-            _piiTupleLists.Add(key, listOfTuples);
+            _piiPackages.Add(key, packageInfo);
         }
 
-        public IEnumerable<KeyValuePair<string,IEnumerable<Tuple<string, string>>>> GetPiiTupleLists()
+        public void AddPiiPackageList(string key, IEnumerable<Tuple<string, string>> listOfTuples)
         {
-            return _piiTupleLists;
+            _piiPackageLists.Add(key, listOfTuples);
+        }
+
+        public IEnumerable<KeyValuePair<string,IEnumerable<Tuple<string, string>>>> GetPiiPackageList()
+        {
+            return _piiPackageLists;
         }
 
 

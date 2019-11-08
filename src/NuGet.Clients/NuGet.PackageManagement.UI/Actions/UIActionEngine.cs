@@ -317,9 +317,10 @@ namespace NuGet.PackageManagement.UI
             var startTime = DateTimeOffset.Now;
             var packageCount = 0;
 
-            IEnumerable<Tuple<string,string>> addedPackages = null;
             IEnumerable<string> removedPackages = null;
-            IEnumerable<string> updatedPackages = null;
+            IEnumerable<Tuple<string,string>> addedPackages = null;
+            IEnumerable<Tuple<string,string>> updatedPackagesOld = null;
+            IEnumerable<Tuple<string,string>> updatedPackagesNew = null;
 
 
             // Enable granular level telemetry events for nuget ui operation
@@ -362,8 +363,9 @@ namespace NuGet.PackageManagement.UI
                             var updateCount = results.SelectMany(result => result.Updated).
                                 Select(result => result.New.Id).Distinct().Count();
 
-                            //updated packages have an old and a new id.  Select the new Id.
-                            updatedPackages = results.SelectMany(result => result.Updated).Select(package => package.New.Id).Distinct();
+                            //updated packages can have an old and a new id.  
+                            updatedPackagesOld = results.SelectMany(result => result.Updated).Select(package => new Tuple<string, string>(package.Old.Id, package.Old.Version.ToFullString())).Distinct();
+                            updatedPackagesNew = results.SelectMany(result => result.Updated).Select(package => new Tuple<string, string>(package.New.Id, package.New.Version.ToFullString())).Distinct();
 
                             // update packages count
                             packageCount = addCount + updateCount;
@@ -462,13 +464,14 @@ namespace NuGet.PackageManagement.UI
 
                     if (userAction != null)
                     {
-                        actionTelemetryEvent.AddPiiData("SelectedPackage", userAction.PackageId);
+                        // userAction.Version can be null for deleted packages.  
+                        actionTelemetryEvent.AddPiiPackage("SelectedPackage", new Tuple<string, string>(userAction.PackageId, (userAction.Version == null ? "" : userAction.Version.ToNormalizedString())));
                     }
 
                     // log information about changed  Packages.  Treat package name as PII data.
                     if (addedPackages != null && addedPackages.Count() > 0)
                     {
-                        actionTelemetryEvent.AddListOfPiiTuples("AddedPackages", addedPackages);
+                        actionTelemetryEvent.AddPiiPackageList("AddedPackages", addedPackages);
                     }
 
                     if (removedPackages != null && removedPackages.Count() > 0)
@@ -476,9 +479,14 @@ namespace NuGet.PackageManagement.UI
                         actionTelemetryEvent.AddListOfPiiValues("RemovedPackages", removedPackages);
                     }
 
-                    if (updatedPackages != null && updatedPackages.Count() > 0)
+                    if (updatedPackagesNew != null && updatedPackagesNew.Count() > 0)
                     {
-                        actionTelemetryEvent.AddListOfPiiValues("UpdatedPackages", updatedPackages);
+                        actionTelemetryEvent.AddPiiPackageList("UpdatedPackagesNew", updatedPackagesNew);
+                    }
+
+                    if (updatedPackagesOld != null && updatedPackagesOld.Count() > 0)
+                    {
+                        actionTelemetryEvent.AddPiiPackageList("UpdatedPackagesOld", updatedPackagesOld);
                     }
 
                     TelemetryActivity.EmitTelemetryEvent(actionTelemetryEvent);
