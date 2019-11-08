@@ -350,6 +350,7 @@ namespace NuGet.PackageManagement.UI
                             packageCount = results.SelectMany(result => result.Deleted).
                                 Select(package => package.Id).Distinct().Count();
 
+                            // removed packages don't have version info
                             removedPackages = results.SelectMany(result => result.Deleted).Select(package => package.Id).Distinct();
                         }
                         else
@@ -358,14 +359,14 @@ namespace NuGet.PackageManagement.UI
                                 Select(package => package.Id).Distinct().Count();
 
                             // log rich info about added packages
-                            addedPackages = results.SelectMany(result => result.Added).Select(package => new Tuple<string, string>(package.Id, package.Version.ToFullString())).Distinct();
+                            addedPackages = results.SelectMany(result => result.Added).Select(package => new Tuple<string, string>(package.Id, (userAction.Version == null ? "" : userAction.Version.ToNormalizedString()))).Distinct();
 
                             var updateCount = results.SelectMany(result => result.Updated).
                                 Select(result => result.New.Id).Distinct().Count();
 
                             //updated packages can have an old and a new id.  
-                            updatedPackagesOld = results.SelectMany(result => result.Updated).Select(package => new Tuple<string, string>(package.Old.Id, package.Old.Version.ToFullString())).Distinct();
-                            updatedPackagesNew = results.SelectMany(result => result.Updated).Select(package => new Tuple<string, string>(package.New.Id, package.New.Version.ToFullString())).Distinct();
+                            updatedPackagesOld = results.SelectMany(result => result.Updated).Select(package => new Tuple<string, string>(package.Old.Id, (userAction.Version == null ? "" : userAction.Version.ToNormalizedString()))).Distinct();
+                            updatedPackagesNew = results.SelectMany(result => result.Updated).Select(package => new Tuple<string, string>(package.New.Id, (userAction.Version == null ? "" : userAction.Version.ToNormalizedString()))).Distinct();
 
                             // update packages count
                             packageCount = addCount + updateCount;
@@ -462,13 +463,14 @@ namespace NuGet.PackageManagement.UI
                         packageCount,
                         duration.TotalSeconds);
 
+                    // log the single top level package the user is installing or removing
                     if (userAction != null)
                     {
                         // userAction.Version can be null for deleted packages.  
                         actionTelemetryEvent.AddPiiPackage("SelectedPackage", new Tuple<string, string>(userAction.PackageId, (userAction.Version == null ? "" : userAction.Version.ToNormalizedString())));
                     }
 
-                    // log information about changed  Packages.  Treat package name as PII data.
+                    // other packages can be added, removed, or upgraded as part of bulk upgrade or as part of satisfying package dependencies, so log that also
                     if (addedPackages != null && addedPackages.Count() > 0)
                     {
                         actionTelemetryEvent.AddPiiPackageList("AddedPackages", addedPackages);
@@ -479,6 +481,7 @@ namespace NuGet.PackageManagement.UI
                         actionTelemetryEvent.AddListOfPiiValues("RemovedPackages", removedPackages);
                     }
 
+                    // two collections for updated packages: pre and post upgrade
                     if (updatedPackagesNew != null && updatedPackagesNew.Count() > 0)
                     {
                         actionTelemetryEvent.AddPiiPackageList("UpdatedPackagesNew", updatedPackagesNew);
