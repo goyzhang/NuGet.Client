@@ -147,28 +147,27 @@ namespace NuGet.Build.Tasks
             var currProcessId = Process.GetCurrentProcess().Id;
             var exeName = RuntimeEnvironmentHelper.IsWindows ? "dotnet.exe" : "dotnet";
 
-            var dotnetExePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "..", "..", exeName));
+            var fileName = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "..", "..", exeName));
 
             var outputLocation = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "..", "..", "..", "artifacts", "log", $"dotnet-{currProcessId}.nettrace"));
-            var argument = $"trace collect -p {currProcessId} -o {outputLocation}";
+            var arguments = $"trace collect -p {currProcessId} -o {outputLocation}";
 
             // .dotnet/sdk/3.0.100/MSBuild.dll
-            log.LogMinimal($"dotnet.exe path is {dotnetExePath}. Exists: {File.Exists(dotnetExePath)}");
-            log.LogMinimal($"Running {dotnetExePath} {argument}");
+            log.LogMinimal($"dotnet.exe path is {fileName}. Exists: {File.Exists(fileName)}");
+            log.LogMinimal($"Running {fileName} {arguments}");
 
             Process process = null;
             try
             {
                 var startinfo = new ProcessStartInfo()
                 {
-                    FileName = dotnetExePath,
-                    Arguments = argument,
-                    UseShellExecute = true,
+                    FileName = fileName,
+                    Arguments = arguments,
+                    UseShellExecute = true, // false
+                    CreateNoWindow = false,
                     RedirectStandardError = false,
                     RedirectStandardInput = false,
                     RedirectStandardOutput = false,
-                    CreateNoWindow = false,
-                    WindowStyle = ProcessWindowStyle.Normal,
                 };
                 process = Process.Start(startinfo);
             }
