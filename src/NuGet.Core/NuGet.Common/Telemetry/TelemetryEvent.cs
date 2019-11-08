@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 
 namespace NuGet.Common
@@ -13,6 +14,7 @@ namespace NuGet.Common
         private IDictionary<string, object> _properties;
         private IDictionary<string, object> _piiProperties;
         private IDictionary<string, IEnumerable<string>> _piiLists;
+        private IDictionary<string, IEnumerable<Tuple<string, string>>> _piiTupleLists;
 
         public TelemetryEvent(string eventName) :
             this(eventName, new Dictionary<string, object>())
@@ -25,6 +27,7 @@ namespace NuGet.Common
             _properties = properties;
             _piiProperties = new Dictionary<string, object>();
             _piiLists = new Dictionary<string, IEnumerable<string>>();
+            _piiTupleLists = new Dictionary<string, IEnumerable<Tuple<string, string>>>();
         }
 
         public string Name { get; }
@@ -71,6 +74,17 @@ namespace NuGet.Common
         {
             _piiLists.Add(key, listOfValues);
         }
+
+        public void AddListOfPiiTuples(string key, IEnumerable<Tuple<string, string>> listOfTuples)
+        {
+            _piiTupleLists.Add(key, listOfTuples);
+        }
+
+        public IEnumerable<KeyValuePair<string,IEnumerable<Tuple<string, string>>>> GetPiiTupleLists()
+        {
+            return _piiTupleLists;
+        }
+
 
         public IEnumerable<KeyValuePair<string,IEnumerable<string>>> GetPiiLists() {
             return _piiLists;

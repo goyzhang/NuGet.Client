@@ -57,6 +57,19 @@ namespace NuGet.VisualStudio.Telemetry
                 
             }
 
+            // serialize lists of tuples of pkgname,pkgversion, where names are client side hashed
+            foreach ( var piiTupleList in telemetryEvent.GetPiiTupleLists())
+            {
+                // construct a list of objects containing PII
+                System.Collections.Generic.List<TelemetryPiiPackageInfo> piiTuples = new System.Collections.Generic.List<TelemetryPiiPackageInfo>();
+                foreach(var tuple in piiTupleList.Value)
+                {
+                    piiTuples.Add(new TelemetryPiiPackageInfo() { Name = new VsTelemetryPiiProperty(tuple.Item1), Version = tuple.Item2 });
+                }
+
+                vsTelemetryEvent.Properties[VSPropertyNamePrefix + piiTupleList.Key] = new VsTelemetryComplexProperty(piiTuples.ToArray());
+            }
+
             return vsTelemetryEvent;
         }
     }

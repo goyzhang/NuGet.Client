@@ -317,7 +317,7 @@ namespace NuGet.PackageManagement.UI
             var startTime = DateTimeOffset.Now;
             var packageCount = 0;
 
-            IEnumerable<string> addedPackages = null;
+            IEnumerable<Tuple<string,string>> addedPackages = null;
             IEnumerable<string> removedPackages = null;
             IEnumerable<string> updatedPackages = null;
 
@@ -357,7 +357,7 @@ namespace NuGet.PackageManagement.UI
                                 Select(package => package.Id).Distinct().Count();
 
                             // log rich info about added packages
-                            addedPackages = results.SelectMany(result => result.Added).Select(package => package.Id).Distinct();
+                            addedPackages = results.SelectMany(result => result.Added).Select(package => new Tuple<string, string>(package.Id, package.Version.ToFullString())).Distinct();
 
                             var updateCount = results.SelectMany(result => result.Updated).
                                 Select(result => result.New.Id).Distinct().Count();
@@ -468,7 +468,7 @@ namespace NuGet.PackageManagement.UI
                     // log information about changed  Packages.  Treat package name as PII data.
                     if (addedPackages != null && addedPackages.Count() > 0)
                     {
-                        actionTelemetryEvent.AddListOfPiiValues("AddedPackages", addedPackages);
+                        actionTelemetryEvent.AddListOfPiiTuples("AddedPackages", addedPackages);
                     }
 
                     if (removedPackages != null && removedPackages.Count() > 0)
