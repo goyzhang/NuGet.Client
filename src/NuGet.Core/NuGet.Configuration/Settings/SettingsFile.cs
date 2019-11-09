@@ -17,7 +17,7 @@ namespace NuGet.Configuration
         /// <summary>
         /// Full path to the settings file
         /// </summary>
-        public string ConfigFilePath => Path.GetFullPath(Path.Combine(DirectoryPath, FileName));
+        internal string ConfigFilePath { get; }
 
         /// <summary>
         /// Folder under which the settings file is present
@@ -28,11 +28,6 @@ namespace NuGet.Configuration
         /// Filename of the settings file
         /// </summary>
         internal string FileName { get; }
-
-        /// <summary>
-        /// Next config file to read in the hierarchy
-        /// </summary>
-        internal SettingsFile Next { get; private set; }
 
         /// <summary>
         /// Defines if the configuration settings have been changed but have not been saved to disk
@@ -46,12 +41,6 @@ namespace NuGet.Configuration
         internal bool IsMachineWide { get; }
 
         /// <summary>
-        /// Order in which the files will be read.
-        /// A larger number means closer to the user.
-        /// </summary>
-        internal int Priority { get; private set; }
-
-        /// <summary>
         /// XML element for settings file
         /// </summary>
         private readonly XDocument _xDocument;
@@ -61,6 +50,17 @@ namespace NuGet.Configuration
         /// By definition of a nuget.config, the root element has to be a 'configuration' element
         /// </summary>
         private readonly NuGetConfiguration _rootElement;
+
+        /// <summary>
+        /// Next config file to read in the hierarchy
+        /// </summary>
+        internal SettingsFile Next { get; private set; }
+
+        /// <summary>
+        /// Order in which the files will be read.
+        /// A larger number means closer to the user.
+        /// </summary>
+        internal int Priority { get; private set; }
 
         /// <summary>
         /// Creates an instance of a non machine wide SettingsFile with the default filename.
@@ -108,6 +108,7 @@ namespace NuGet.Configuration
 
             DirectoryPath = directoryPath;
             FileName = fileName;
+            ConfigFilePath = Path.GetFullPath(Path.Combine(DirectoryPath, FileName));
             IsMachineWide = isMachineWide;
             Priority = 0;
 

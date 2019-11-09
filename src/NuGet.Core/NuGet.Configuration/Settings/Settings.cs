@@ -171,21 +171,38 @@ namespace NuGet.Configuration
             : this(new SettingsFile(root, fileName)) { }
 
         public Settings(string root, string fileName, bool isMachineWide)
-            : this(new SettingsFile(root, fileName, isMachineWide)) { }
+            : this(new List<SettingsFile>() { new SettingsFile(root, fileName, isMachineWide) })
+        {
+        }
 
         internal Settings(SettingsFile settingsHead)
         {
             _settingsHead = settingsHead;
-            var computedSections = new Dictionary<string, VirtualSettingSection>();
 
-            var curr = _settingsHead;
+            var settingsFiles = new List<SettingsFile>();
+            var curr = _settingsHead?.Next; // TODO NK - This is weird...why?
             while (curr != null)
             {
-                curr.MergeSectionsInto(computedSections);
+                settingsFiles.Add(curr);
                 curr = curr.Next;
+            }
+        }
+
+        private IList<SettingsFile> SettingsFiles { get; } // TODO NK - This will be priority.
+
+        internal Settings(IList<SettingsFile> settingsFiles)
+        {
+            SettingsFiles = settingsFiles;
+
+            var computedSections = new Dictionary<string, VirtualSettingSection>();
+
+            foreach( var settingsFile in settingsFiles)
+            {
+                settingsFile.MergeSectionsInto(computedSections);
             }
 
             _computedSections = computedSections;
+
         }
 
         private SettingsFile GetOutputSettingFileForSection(string sectionName)
