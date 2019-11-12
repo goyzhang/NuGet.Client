@@ -165,28 +165,28 @@ namespace NuGet.Configuration
         public event EventHandler SettingsChanged = delegate { };
 
         public Settings(string root)
-            : this(new SettingsFile(root)) { }
+            : this(new List<SettingsFile> { new SettingsFile(root) }) { }
 
         public Settings(string root, string fileName)
-            : this(new SettingsFile(root, fileName)) { }
+            : this(new List<SettingsFile> { new SettingsFile(root, fileName) }) { }
 
         public Settings(string root, string fileName, bool isMachineWide)
             : this(new List<SettingsFile>() { new SettingsFile(root, fileName, isMachineWide) })
         {
         }
 
-        internal Settings(SettingsFile settingsHead)
-        {
-            _settingsHead = settingsHead;
+        //internal Settings(SettingsFile settingsHead)
+        //{
+        //    _settingsHead = settingsHead;
 
-            var settingsFiles = new List<SettingsFile>();
-            var curr = _settingsHead?.Next; // TODO NK - This is weird...why?
-            while (curr != null)
-            {
-                settingsFiles.Add(curr);
-                curr = curr.Next;
-            }
-        }
+        //    var settingsFiles = new List<SettingsFile>();
+        //    var curr = _settingsHead?.Next; // TODO NK - This is weird...why?
+        //    while (curr != null)
+        //    {
+        //        settingsFiles.Add(curr);
+        //        curr = curr.Next;
+        //    }
+        //}
 
         private IList<SettingsFile> SettingsFiles { get; } // TODO NK - This will be priority.
 
@@ -236,18 +236,22 @@ namespace NuGet.Configuration
         {
             get
             {
-                // explore the linked list, terminating when a duplicate path is found
-                var current = _settingsHead;
-                var found = new List<SettingsFile>();
-                var paths = new HashSet<string>();
-                while (current != null && paths.Add(current.ConfigFilePath))
-                {
-                    found.Add(current);
-                    current = current.Next;
-                }
 
-                return found
-                    .OrderByDescending(s => s.Priority);
+                //// explore the linked list, terminating when a duplicate path is found
+                //var current = _settingsHead;
+                //var found = new List<SettingsFile>();
+                //var paths = new HashSet<string>();
+                //while (current != null && paths.Add(current.ConfigFilePath))
+                //{
+                //    found.Add(current);
+                //    current = current.Next;
+                //}
+
+                //return found
+                //    .OrderByDescending(s => s.Priority);
+
+                // The first value in the linked list is the highest priority and the one closest to the user.
+                return SettingsFiles;
             }
         }
 
@@ -485,7 +489,9 @@ namespace NuGet.Configuration
             // wide config files. The head file is the one we want to read first, while the user wide config
             // is the one that we want to write to.
             // TODO: add UI to allow specifying which one to write to
-            return new Settings(validSettingFiles.Last());
+            // Reverse
+            validSettingFiles.Reverse();
+            return new Settings(settingsFiles: validSettingFiles);
         }
 
         private static SettingsFile LoadUserSpecificSettings(
@@ -605,8 +611,9 @@ namespace NuGet.Configuration
             if (settingFiles.Any())
             {
                 SettingsFile.ConnectSettingsFilesLinkedList(settingFiles);
-
-                return new Settings(settingFiles.Last());
+                // Reverse the order.
+                settingFiles.Reverse();
+                return new Settings(settingFiles);
             }
 
             return NullSettings.Instance;
