@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using NuGet.Protocol.Core.Types;
 using NuGet.Test.Utility;
 using NuGet.Versioning;
 using Xunit;
+using Xunit.Sdk;
 
 namespace NuGet.Protocol.Tests
 {
@@ -1015,6 +1017,87 @@ namespace NuGet.Protocol.Tests
 
         [Fact]
         public void LocalFolderUtility_GetPackagesByIdV3NotFoundMissingDir()
+        {
+            using (var root = TestDirectory.Create())
+            {
+                // Arrange
+                var testLogger = new TestLogger();
+
+                // Act
+                var packages = LocalFolderUtility.GetPackagesV3(root, "A", testLogger).ToList();
+
+                // Assert
+                Assert.Equal(0, packages.Count);
+                Assert.Equal(0, testLogger.Messages.Count);
+            }
+        }
+
+        [Fact]
+        public void LocalFolderUtility_EnsurePackageFileExists_ThrowsWhenEmpty()
+        {
+            //Arrange
+            List<string> testList = new List<string>();
+            string packagePath = string.Empty;
+
+            //Act
+            try
+            {
+                LocalFolderUtility.EnsurePackageFileExists(packagePath, testList);
+                Assert.True(false, "Did not throw an exception as expected. ");
+            }
+            catch (ArgumentException ex)
+            {
+                //Expected an exception explaining that the file wasn't found.
+                string expectedError = string.Format(CultureInfo.CurrentCulture,
+                                       Strings.UnableToFindFile,
+                                       packagePath);
+
+                Assert.Equal(expectedError, ex.Message);
+            }
+        }
+
+        [Fact]
+        public void LocalFolderUtility_EnsurePackageFileExists_DoesNotThrowWhenExists()
+        {
+
+        }
+
+        [Fact]
+        public void LocalFolderUtility_ResolvePackageFromPath_EmptyWhenNotFound()
+        {
+            using (var root = TestDirectory.Create())
+            {
+                // Arrange
+                var testLogger = new TestLogger();
+
+                // Act
+                var packages = LocalFolderUtility.GetPackagesV3(root, "A", testLogger).ToList();
+
+                // Assert
+                Assert.Equal(0, packages.Count);
+                Assert.Equal(0, testLogger.Messages.Count);
+            }
+        }
+
+        [Fact]
+        public void LocalFolderUtility_ResolvePackageFromPath_OneWhenExactFileNameFound()
+        {
+            using (var root = TestDirectory.Create())
+            {
+                // Arrange
+                var testLogger = new TestLogger();
+
+                // Act
+                var packages = LocalFolderUtility.GetPackagesV3(root, "A", testLogger).ToList();
+
+                // Assert
+                Assert.Equal(0, packages.Count);
+                Assert.Equal(0, testLogger.Messages.Count);
+            }
+        }
+
+        [Fact]
+        public void LocalFolderUtility_ResolvePackageFromPath_FindsAllWhenWildcard()
         {
             using (var root = TestDirectory.Create())
             {
