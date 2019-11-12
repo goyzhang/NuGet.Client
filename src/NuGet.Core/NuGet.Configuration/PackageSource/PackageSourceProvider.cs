@@ -83,7 +83,8 @@ namespace NuGet.Configuration
             var sourcesItems = packageSourcesSection?.Items.OfType<SourceItem>();
 
             // Order the list so that the closer to the user appear first
-            var sources = sourcesItems?.OrderByDescending(item => item.Origin?.Priority ?? 0);
+            // TODO NK - assume they are in the correct order.
+            var sources = sourcesItems;//?.OrderByDescending(item => item.Origin?.Priority ?? 0);
 
             // get list of disabled packages
             var disabledSourcesSection = settings.GetSection(ConfigurationConstants.DisabledPackageSources);

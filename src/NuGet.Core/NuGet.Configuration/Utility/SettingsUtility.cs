@@ -302,7 +302,7 @@ namespace NuGet.Configuration
             // Settings are usually read from top to bottom, but in the case of fallback folders
             // we care more about the bottom ones, so those ones should go first.
             return fallbackValues
-                .OrderByDescending(i => i.Origin?.Priority ?? 0)
+                //.OrderByDescending(i => i.Origin?.Priority ?? 0)
                 .OfType<AddItem>()
                 .Select(folder => folder.GetValueAsPath())
                 .ToList();

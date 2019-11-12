@@ -41,7 +41,7 @@ namespace NuGet.Configuration
             new[] { "*.config" } :
             new[] { "*.Config", "*.config" };
 
-        private readonly SettingsFile _settingsHead;
+        //private readonly SettingsFile _settingsHead;
 
         private readonly Dictionary<string, VirtualSettingSection> _computedSections;
 
@@ -109,7 +109,9 @@ namespace NuGet.Configuration
 
             if (currentSettings == null)
             {
-                Priority.First().SetNextFile(settingsFile);
+                // pretty sure this is SettingsFiles.AddFirst
+                SettingsFiles.Add(settingsFile);
+               // Priority.First().SetNextFile(settingsFile);
             }
 
             // If it is an update this will take care of it and modify the underlaying object, which is also referenced by _computedSections.
@@ -469,9 +471,10 @@ namespace NuGet.Configuration
             if (machineWideSettings != null && machineWideSettings.Settings is Settings mwSettings && string.IsNullOrEmpty(configFileName))
             {
                 // Priority gives you the settings file in the order you want to start reading them
-                validSettingFiles.AddRange(
-                    mwSettings.Priority.Select(
-                        s => new SettingsFile(s.DirectoryPath, s.FileName, s.IsMachineWide)));
+                var files = mwSettings.Priority.Select(
+                        s => new SettingsFile(s.DirectoryPath, s.FileName, s.IsMachineWide));
+
+                validSettingFiles.AddRange(files);
             }
 
             if (validSettingFiles?.Any() != true)
@@ -482,14 +485,14 @@ namespace NuGet.Configuration
                 return NullSettings.Instance;
             }
 
-            SettingsFile.ConnectSettingsFilesLinkedList(validSettingFiles);
+            //SettingsFile.ConnectSettingsFilesLinkedList(validSettingFiles);
 
             // Create a settings object with the linked list head. Typically, it's either the config file in %ProgramData%\NuGet\Config,
             // or the user wide config (%APPDATA%\NuGet\nuget.config) if there are no machine
             // wide config files. The head file is the one we want to read first, while the user wide config
             // is the one that we want to write to.
             // TODO: add UI to allow specifying which one to write to
-            // Reverse
+            // Reverse - try now
             validSettingFiles.Reverse();
             return new Settings(settingsFiles: validSettingFiles);
         }
@@ -610,9 +613,10 @@ namespace NuGet.Configuration
 
             if (settingFiles.Any())
             {
-                SettingsFile.ConnectSettingsFilesLinkedList(settingFiles);
+                //SettingsFile.ConnectSettingsFilesLinkedList(settingFiles);
                 // Reverse the order.
-                settingFiles.Reverse();
+                //settingFiles.Reverse();
+                // TODO NK - Maybe don't?
                 return new Settings(settingFiles);
             }
 
