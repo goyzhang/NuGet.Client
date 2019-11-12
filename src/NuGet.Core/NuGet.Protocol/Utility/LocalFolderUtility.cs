@@ -995,15 +995,26 @@ namespace NuGet.Protocol
         {
             if (!PackagePathResolved(matchingPackagePaths))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
-                      Strings.UnableToFindFile,
-                      packagePath));
+                ThrowUnableToFindFile(packagePath);
             }
+        }
+
+        public static void ThrowUnableToFindFile(string packagePath)
+        {
+            throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
+                                  Strings.UnableToFindFile,
+                                  packagePath));
+        }
+
+        public static bool PackagePathResolved(string packagePath, bool isSnupkgPush)
+        {
+            var matchingPackagePaths = ResolvePackageFromPath(packagePath, isSnupkgPush);
+            return PackagePathResolved(matchingPackagePaths);
         }
 
         public static bool PackagePathResolved(IEnumerable<string> matchingPackagePaths)
         {
-            return matchingPackagePaths.Any();
+            return matchingPackagePaths != null && matchingPackagePaths.Any();
         }
 
         /// <summary>

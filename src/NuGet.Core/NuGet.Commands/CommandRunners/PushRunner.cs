@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NuGet.Configuration;
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
+using NuGet.Protocol;
 
 namespace NuGet.Commands
 {
@@ -29,6 +30,8 @@ namespace NuGet.Commands
             bool skipDuplicate,
             ILogger logger)
         {
+            LocalFolderUtility.EnsurePackageFileExists()
+
             source = CommandRunnerUtility.ResolveSource(sourceProvider, source);
             symbolSource = CommandRunnerUtility.ResolveSymbolSource(sourceProvider, symbolSource);
 
