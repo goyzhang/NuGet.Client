@@ -1048,7 +1048,6 @@ namespace NuGet.Protocol.Tests
             catch (ArgumentException ex)
             {
                 //Assert
-
                 //Expected an exception explaining that the file wasn't found.
                 string expectedError = string.Format(CultureInfo.CurrentCulture,
                                        Strings.UnableToFindFile,

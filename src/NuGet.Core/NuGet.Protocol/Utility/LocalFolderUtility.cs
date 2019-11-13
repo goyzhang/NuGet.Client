@@ -993,7 +993,7 @@ namespace NuGet.Protocol
         /// <param name="matchingPackagePaths">A list of matching package paths that need to be checked.</param>
         public static void EnsurePackageFileExists(string packagePath, IEnumerable<string> matchingPackagePaths)
         {
-            //if (!matchingPackagePaths.Any())
+            if (!matchingPackagePaths.Any())
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
                     Strings.UnableToFindFile,
