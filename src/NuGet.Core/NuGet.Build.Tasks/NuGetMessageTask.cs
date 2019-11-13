@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Task = Microsoft.Build.Utilities.Task;
+using Microsoft.Build.Utilities;
 
 namespace NuGet.Build.Tasks
 {
@@ -12,21 +12,26 @@ namespace NuGet.Build.Tasks
     /// </summary>
     public sealed class NuGetMessageTask : Task
     {
-        [Required]
-        public string Name { get; set; }
-
-        public string[] Args { get; set; }
-
-        public string Importance { get; set; } = nameof(MessageImportance.Normal);
-
         public NuGetMessageTask()
             : base(Strings.ResourceManager)
         {
         }
 
+        public string[] Args { get; set; }
+
+        public string Importance { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
         public override bool Execute()
         {
-            Enum.TryParse(Importance, ignoreCase: true, out MessageImportance messageImportance);
+            MessageImportance messageImportance = MessageImportance.Normal;
+
+            if (!string.IsNullOrWhiteSpace(Importance) && !Enum.TryParse(Importance, ignoreCase: true, out messageImportance))
+            {
+                messageImportance = MessageImportance.Normal;
+            }
 
             Log.LogMessageFromResources(messageImportance, Name, Args);
 
